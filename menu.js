@@ -1,30 +1,30 @@
 class Pizza {
-    constructor(name, sizes, crusts, is_veg) {
+    constructor(name, sizes, crusts, is_veg, s, c) {
         this.name = name;
         this.sizes = sizes;
         this.crusts = crusts;
         this.is_veg = is_veg;
         this.toppings = [];
-        this.selected_size = null;
-        this.selected_crust = null;
+        this.selected_size = s;
+        this.selected_crust = c;
     }
     add_topping(topping) {
-        this.toppings.push(topping);
+        if(this.is_veg && topping.is_veg){
+            this.toppings.push(topping);
+        }
+        else if(!this.is_veg && topping.name != 'Paneer' && this.toppings.length == 0){
+            this.toppings.push(topping);
+        }
+        else{
+            throw new Error("Wrong toppings combination");
+        }
     }
     set_size(size) {
-        if (this.sizes[size] !== undefined) {
-            this.selected_size = size;
-        } else {
-            throw new Error(`Size ${size} is not available for ${this.name}`);
-        }
+        this.selected_size = size;
     }
 
     set_crust(crust) {
-        if (this.crusts.includes(crust)) {
-            this.selected_crust = crust;
-        } else {
-            throw new Error(`Crust ${crust} is not available for ${this.name}`);
-        }
+        this.selected_crust = crust;
     }
 }
 
@@ -74,6 +74,32 @@ class Order {
             Amount += side.price;
         }
         this.total_amount = Amount;
+    }
+}
+
+class Inventory {
+    constructor() {
+        this.items = {};
+    }
+
+    add_item(name, quantity) {
+        if (this.items[name]) {
+            this.items[name] += quantity;
+        } else {
+            this.items[name] = quantity;
+        }
+    }
+
+    check_availability(name, quantity) {
+        return this.items[name] && this.items[name] >= quantity;
+    }
+
+    use_item(name, quantity) {
+        if (this.checkAvailability(name, quantity)) {
+            this.items[name] -= quantity;
+        } else {
+            throw new Error(`Insufficient inventory for ${name}`);
+        }
     }
 }
 
@@ -132,3 +158,5 @@ const menu = {
         new Side('Mousse cake', 90)
     ]
 };
+const inventory = new Inventory();
+module.exports = { menu, inventory, Pizza, Order, Topping, Side };
