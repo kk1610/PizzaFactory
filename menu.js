@@ -1,12 +1,12 @@
 class Pizza {
-    constructor(name, sizes, crusts, is_veg, s, c) {
+    constructor(name, sizes, crusts, is_veg) {
         this.name = name;
         this.sizes = sizes;
         this.crusts = crusts;
         this.is_veg = is_veg;
         this.toppings = [];
-        this.selected_size = s;
-        this.selected_crust = c;
+        this.selected_size = null;
+        this.selected_crust = null;
     }
     add_topping(topping) {
         if(this.is_veg && topping.is_veg){
@@ -64,6 +64,10 @@ class Order {
             }
             let pizza_total = pizza.sizes[pizza.selected_size];
             for (let j = 0; j < pizza.toppings.length; j++) {
+                if (this.selected_size === "Large" && j < 2) {
+                    continue;
+                }
+            
                 const topping = pizza.toppings[j];
                 pizza_total += topping.price;
             }
@@ -90,16 +94,18 @@ class Inventory {
         }
     }
 
+    update_price(name, new_price) {
+        if (this.items[name]) {
+            this.items[name].price = new_price;
+        }
+    }
+
     check_availability(name, quantity) {
         return this.items[name] && this.items[name] >= quantity;
     }
 
     use_item(name, quantity) {
-        if (this.checkAvailability(name, quantity)) {
             this.items[name] -= quantity;
-        } else {
-            throw new Error(`Insufficient inventory for ${name}`);
-        }
     }
 }
 
@@ -159,4 +165,9 @@ const menu = {
     ]
 };
 const inventory = new Inventory();
+inventory.add_item('Regular', 10);
+inventory.add_item('Medium', 10);
+inventory.add_item('Large', 10);
+menu.toppings.forEach(topping => inventory.add_item(topping.name, 20));
+menu.sides.forEach(side => inventory.add_item(side.name, 15));
 module.exports = { menu, inventory, Pizza, Order, Topping, Side };
