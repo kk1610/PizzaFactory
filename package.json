@@ -1,6 +1,18 @@
 {
+  "name": "pizzafactory",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "express": "^4.19.2",
     "init": "^0.1.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^10.6.0"
   }
 }

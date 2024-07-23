@@ -84,6 +84,7 @@ class Order {
 class Inventory {
     constructor() {
         this.items = {};
+
     }
 
     add_item(name, quantity) {
@@ -105,7 +106,8 @@ class Inventory {
     }
 
     use_item(name, quantity) {
-            this.items[name] -= quantity;
+            if(this.items[name].quantity >= quantity)
+                this.items[name] -= quantity;
     }
 }
 
@@ -170,4 +172,4 @@ inventory.add_item('Medium', 10);
 inventory.add_item('Large', 10);
 menu.toppings.forEach(topping => inventory.add_item(topping.name, 20));
 menu.sides.forEach(side => inventory.add_item(side.name, 15));
-module.exports = { menu, inventory, Pizza, Order, Topping, Side };
+module.exports = { menu, Inventory, Pizza, Order, Topping, Side };
