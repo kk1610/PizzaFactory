@@ -1,38 +1,61 @@
 class Pizza {
-    constructor(name, sizes, crusts, is_veg) {
+    constructor(name, sizes, crusts, isVeg) {
         this.name = name;
         this.sizes = sizes;
         this.crusts = crusts;
-        this.is_veg = is_veg;
+        this.isVeg = isVeg;
         this.toppings = [];
-        this.selected_size = null;
-        this.selected_crust = null;
+        this.selectedSize = null;
+        this.selectedCrust = null;
     }
-    add_topping(topping) {
-        if(this.is_veg && topping.is_veg){
+
+    addTopping(topping) {
+        if (this.isVeg && topping.isVeg) {
             this.toppings.push(topping);
-        }
-        else if(!this.is_veg && topping.name != 'Paneer' && this.toppings.length == 0){
+        } else if (!this.isVeg && topping.name !== 'Paneer' && this.toppings.length === 0) {
             this.toppings.push(topping);
-        }
-        else{
+        } else {
             throw new Error("Wrong toppings combination");
         }
     }
-    set_size(size) {
-        this.selected_size = size;
+
+    setSize(size) {
+        if (!this.sizes[size]) {
+            throw new Error(`Size ${size} not available for pizza ${this.name}`);
+        }
+        this.selectedSize = size;
     }
 
-    set_crust(crust) {
-        this.selected_crust = crust;
+    setCrust(crust) {
+        if (!this.crusts.includes(crust)) {
+            throw new Error(`Crust ${crust} not available for pizza ${this.name}`);
+        }
+        this.selectedCrust = crust;
+    }
+
+    calculatePrice() {
+        if (!this.selectedSize) {
+            throw new Error(`Size not set for pizza ${this.name}`);
+        }
+
+        let pizzaTotal = this.sizes[this.selectedSize];
+        for (let i = 0; i < this.toppings.length; i++) {
+            const topping = this.toppings[i];
+            if (this.selectedSize === "Large" && i < 2) {
+                continue;
+            }
+            pizzaTotal += topping.price;
+        }
+
+        return pizzaTotal;
     }
 }
 
 class Topping {
-    constructor(name, price, is_veg) {
+    constructor(name, price, isVeg) {
         this.name = name;
         this.price = price;
-        this.is_veg = is_veg;
+        this.isVeg = isVeg;
     }
 }
 
@@ -46,48 +69,38 @@ class Side {
 class Order {
     constructor() {
         this.pizzas = [];
-        this.total_amount = 0;
         this.sides = [];
     }
-    add_pizza(pizza) {
+
+    addPizza(pizza) {
         this.pizzas.push(pizza);
     }
-    add_side(side) {
+
+    addSide(side) {
         this.sides.push(side);
     }
-    calculate_total() {
-        let Amount = 0;
-        for (let i = 0; i < this.pizzas.length; i++) {
-            const pizza = this.pizzas[i];
-            if (!pizza.selected_size) {
-                throw new Error(`Size not set for pizza ${pizza.name}`);
-            }
-            let pizza_total = pizza.sizes[pizza.selected_size];
-            for (let j = 0; j < pizza.toppings.length; j++) {
-                if (this.selected_size === "Large" && j < 2) {
-                    continue;
-                }
-            
-                const topping = pizza.toppings[j];
-                pizza_total += topping.price;
-            }
-            Amount += pizza_total;
+
+    calculateTotal() {
+        let amount = 0;
+
+        for (const pizza of this.pizzas) {
+            amount += pizza.calculatePrice();
         }
-        for (let i = 0; i < this.sides.length; i++) {
-            const side = this.sides[i];
-            Amount += side.price;
+
+        for (const side of this.sides) {
+            amount += side.price;
         }
-        this.total_amount = Amount;
+
+        return amount;
     }
 }
 
 class Inventory {
     constructor() {
         this.items = {};
-
     }
 
-    add_item(name, quantity) {
+    addItem(name, quantity) {
         if (this.items[name]) {
             this.items[name] += quantity;
         } else {
@@ -95,19 +108,22 @@ class Inventory {
         }
     }
 
-    update_price(name, new_price) {
+    updatePrice(name, newPrice) {
         if (this.items[name]) {
-            this.items[name].price = new_price;
+            this.items[name].price = newPrice;
         }
     }
 
-    check_availability(name, quantity) {
+    checkAvailability(name, quantity) {
         return this.items[name] && this.items[name] >= quantity;
     }
 
-    use_item(name, quantity) {
-            if(this.items[name].quantity >= quantity)
-                this.items[name] -= quantity;
+    useItem(name, quantity) {
+        if (this.items[name] >= quantity) {
+            this.items[name] -= quantity;
+        } else {
+            throw new Error(`Insufficient quantity of ${name}`);
+        }
     }
 }
 
@@ -117,37 +133,37 @@ const menu = {
             name: 'Deluxe Veggie',
             sizes: { Regular: 150, Medium: 200, Large: 325 },
             crusts: ['New hand tossed', 'Wheat thin crust', 'Cheese Burst', 'Fresh pan pizza'],
-            is_veg: true
+            isVeg: true
         },
         {
             name: 'Cheese and Corn',
             sizes: { Regular: 175, Medium: 375, Large: 475 },
             crusts: ['New hand tossed', 'Wheat thin crust', 'Cheese Burst', 'Fresh pan pizza'],
-            is_veg: true
+            isVeg: true
         },
         {
             name: 'Paneer Tikka',
             sizes: { Regular: 160, Medium: 290, Large: 340 },
             crusts: ['New hand tossed', 'Wheat thin crust', 'Cheese Burst', 'Fresh pan pizza'],
-            is_veg: true
+            isVeg: true
         },
         {
             name: 'Non-Veg Supreme',
             sizes: { Regular: 190, Medium: 325, Large: 425 },
             crusts: ['New hand tossed', 'Wheat thin crust', 'Cheese Burst', 'Fresh pan pizza'],
-            is_veg: false
+            isVeg: false
         },
         {
             name: 'Chicken Tikka',
             sizes: { Regular: 210, Medium: 370, Large: 500 },
             crusts: ['New hand tossed', 'Wheat thin crust', 'Cheese Burst', 'Fresh pan pizza'],
-            is_veg: false
+            isVeg: false
         },
         {
             name: 'Pepper Barbecue Chicken',
             sizes: { Regular: 220, Medium: 380, Large: 525 },
             crusts: ['New hand tossed', 'Wheat thin crust', 'Cheese Burst', 'Fresh pan pizza'],
-            is_veg: false
+            isVeg: false
         },
     ],
     toppings: [
@@ -166,10 +182,12 @@ const menu = {
         new Side('Mousse cake', 90)
     ]
 };
+
 const inventory = new Inventory();
-inventory.add_item('Regular', 10);
-inventory.add_item('Medium', 10);
-inventory.add_item('Large', 10);
-menu.toppings.forEach(topping => inventory.add_item(topping.name, 20));
-menu.sides.forEach(side => inventory.add_item(side.name, 15));
+inventory.addItem('Regular', 10);
+inventory.addItem('Medium', 10);
+inventory.addItem('Large', 10);
+menu.toppings.forEach(topping => inventory.addItem(topping.name, 20));
+menu.sides.forEach(side => inventory.addItem(side.name, 15));
+
 module.exports = { menu, Inventory, Pizza, Order, Topping, Side };
